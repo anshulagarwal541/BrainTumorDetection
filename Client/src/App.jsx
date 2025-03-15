@@ -25,7 +25,7 @@ import UserUpdateDetails from "./pages/User/UserUpdateDetails.jsx";
 import PasswordChange from "./pages/User/PasswordChange.jsx";
 
 function App() {
-  const url = "http://localhost:8080";
+  const url = "https://braintumordetection-backend.onrender.com";
   const [error, setError] = useState(false);
   const [errorType, setErrorType] = useState(null);
   const [errorMessage, setErrorMessage] = useState(null);
