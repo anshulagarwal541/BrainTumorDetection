@@ -16,9 +16,9 @@ function AdminUserDashboard({ children }) {
     const [admin, setAdmin] = useState(null)
 
     useEffect(() => {
-        axios.get(`${url}/admin/getUser/${statusId}`, {
+        axios.get(`${url}/doctor/getUser/${statusId}`, {
             headers: {
-                Authorization: `Bearer ${sessionStorage.getItem("adminAccessToken")}`
+                Authorization: `Bearer ${sessionStorage.getItem("doctorAccessToken")}`
             }
         }).then((response) => {
             if (!response.data.error) {
@@ -37,9 +37,9 @@ function AdminUserDashboard({ children }) {
             }
         })
 
-        axios.get(`${url}/admin`, {
+        axios.get(`${url}/doctor`, {
             headers: {
-                Authorization: `Bearer ${sessionStorage.getItem("adminAccessToken")}`
+                Authorization: `Bearer ${sessionStorage.getItem("doctorAccessToken")}`
             }
         }).then((response) => {
             if (!response.data.error) {

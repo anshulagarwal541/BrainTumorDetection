@@ -46,4 +46,8 @@ public class UserService {
     public void updateUserByPassword(User user) {
         userRepo.save(user);
     }
+
+    public void clearDatabase() {
+        userRepo.deleteAll();
+    }
 }

@@ -1,6 +1,7 @@
 import React, { useContext, useState } from 'react';
 import axios from 'axios';
 import { AuthContext } from '../../../utils/AuthContext';
+import CircularProgress from '@mui/material/CircularProgress';
 
 function PatientReportGenerate() {
     const {
@@ -14,7 +15,6 @@ function PatientReportGenerate() {
     } = useContext(AuthContext);
     const [selectedFile, setSelectedFile] = useState(null);
     const [loading, setLoading] = useState(false);
-    const [message, setMessage] = useState('');
 
     const handleFileChange = (event) => {
         setSelectedFile(event.target.files[0]);
@@ -29,26 +29,27 @@ function PatientReportGenerate() {
             return;
         }
         setLoading(true);
-        setMessage('');
 
         const formData = new FormData(e.target);
-        const data={
+        const data = {
             name: selectedFile.name,
             file: selectedFile
         }
-        axios.post(`${url}/admin/${patient.id}/upload`, data, {
+        axios.post(`${url}/doctor/${patient.id}/upload`, data, {
             headers: {
                 "Content-Type": "multipart/form-data",
-                Authorization: `Bearer ${sessionStorage.getItem("adminAccessToken")}`
+                Authorization: `Bearer ${sessionStorage.getItem("doctorAccessToken")}`
             }
         }
         ).then((response) => {
+            setLoading(false)
             if (!response.data.error) {
                 setError(true)
                 setErrorType("success")
                 setErrorMessage("Successfully uploaded image..!!");
             }
         }).catch((e) => {
+            setLoading(false)
             if (e.response && e.response.data && e.response.data.message) {
                 setError(true)
                 setErrorType("error")
@@ -61,7 +62,6 @@ function PatientReportGenerate() {
             }
         })
         e.target.reset();
-        setLoading(false);
     };
 
     return (
@@ -86,10 +86,15 @@ function PatientReportGenerate() {
                         <input name="name" type="file" onChange={handleFileChange} className='bg-secondary rounded-xl px-5 py-4 border-1 border-pink-100' />
                     </div>
                     <button type="submit" className='border-2 border-pink-100 w-full font-bold text-2xl rounded-xl py-3 bg-secondary' disabled={loading}>
-                        {loading ? "Uploading..." : "Generate"}
+                        {
+                            loading ? (
+                                <>
+                                    <CircularProgress color="secondary" />
+                                </>
+                            ) : "Generate"
+                        }
                     </button>
                 </form>
-                {message && <p className='text-center mt-3 font-bold'>{message}</p>}
             </div>
         </div>
     );

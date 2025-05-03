@@ -6,6 +6,7 @@ import Alert from '@mui/material/Alert';
 import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import { AuthContext } from '../../utils/AuthContext'
+import CircularProgress from '@mui/material/CircularProgress';
 
 function UserLogin() {
   const {
@@ -16,15 +17,18 @@ function UserLogin() {
   } = useContext(AuthContext);
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const handleLogin = (e) => {
     e.preventDefault();
+    setLoading(true)
     const formData = new FormData(e.target);
     const data = {
       email: formData.get("email"),
       password: formData.get("password")
     }
     axios.post(`${url}/login/user`, data).then((response) => {
+      setLoading(false)
       if (!response.data.error) {
         sessionStorage.setItem("userAccessToken", response.data);
         setError(true)
@@ -33,6 +37,7 @@ function UserLogin() {
         navigate("/user");
       }
     }).catch((e) => {
+      setLoading(false)
       if (e.response && e.response.data && e.response.data.error) {
         setError(true)
         setErrorType("error")
@@ -116,11 +121,24 @@ function UserLogin() {
               />
             </div>
             <button className="px-4 py-2 w-full text-pink-100 bg-secondary border-2 border-pink-100 font-bold rounded-lg hover:bg-primary hover:text-secondary transition-all duration-300">
-              Login
+              {
+                loading ? (
+                  <>
+                    <CircularProgress color="secondary" />
+                  </>
+                ) : "Login"
+              }
             </button>
             <div className="flex flex-col gap-2">
               <p className='font-bold flex gap-5 items-center justify-between'>Login as Admin ?
                 <Link to="/login/admin">
+                  <button className="px-4 py-2 w-fit text-pink-100 bg-secondary border-2 border-pink-100 font-bold hover:bg-primary hover:text-secondary transition-all duration-300">
+                    Login
+                  </button>
+                </Link>
+              </p>
+              <p className='font-bold flex gap-5 items-center justify-between'>Login as Doc ?
+                <Link to="/login/doctor">
                   <button className="px-4 py-2 w-fit text-pink-100 bg-secondary border-2 border-pink-100 font-bold hover:bg-primary hover:text-secondary transition-all duration-300">
                     Login
                   </button>

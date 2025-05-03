@@ -16,7 +16,7 @@ function UserChat() {
 
     useEffect(() => {
         if (user) {
-            axios.get(`${url}/user/${user.id}/messages`, {
+            axios.get(`${url}/user/${user.userInfo.user.id}/messages`, {
                 headers: {
                     Authorization: `Bearer ${sessionStorage.getItem("userAccessToken")}`
                 }
@@ -46,12 +46,12 @@ function UserChat() {
         const formData = new FormData(e.target);
         const today = new Date();
         const data = {
-            sender: user,
-            reciever: admin,
+            sender: user.userInfo.user,
+            reciever: admin.user,
             message: formData.get("message").trim(),
             dateTime: formattedDate
         };
-        axios.post(`${url}/user/${user.id}/message`, data, {
+        axios.post(`${url}/user/${user.userInfo.user.id}/message`, data, {
             headers: {
                 Authorization: `Bearer ${sessionStorage.getItem("userAccessToken")}`
             }
@@ -77,13 +77,13 @@ function UserChat() {
     return (
         <div className='bg-pink-100 min-h-[100vh] text-primary flex flex-col'>
             <div className='border-b-2 border-b-primary p-4 text-center text-2xl font-extrabold'>
-                Advisor
+                {admin && admin.name}
             </div>
 
             <div className="flex flex-col flex-grow overflow-y-auto px-4 py-4 space-y-3">
                 {user && messages && messages.map((msg) => (
-                    <div key={msg.id} className={`flex ${msg.sender.id === user.id ? 'justify-end' : 'justify-start'}`}>
-                        <div className={`max-w-xs p-3 rounded-xl ${msg.sender.id === user.id ? 'bg-primary text-pink-100' : 'bg-gray-200 text-gray-800'}`}>
+                    <div key={msg.id} className={`flex ${msg.sender.id === user.userInfo.user.id ? 'justify-end' : 'justify-start'}`}>
+                        <div className={`max-w-xs p-3 rounded-xl ${msg.sender.id != user.userInfo.user.id ? 'bg-primary text-pink-100' : 'bg-gray-200 text-gray-800'}`}>
                             {msg.message}
                         </div>
                     </div>

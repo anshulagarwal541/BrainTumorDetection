@@ -1,6 +1,7 @@
 import React, { useContext, useState } from 'react';
 import axios from 'axios';
 import { AuthContext } from '../../utils/AuthContext';
+import CircularProgress from '@mui/material/CircularProgress';
 
 function UserGnerateReports() {
     const {
@@ -13,7 +14,6 @@ function UserGnerateReports() {
     } = useContext(AuthContext);
     const [selectedFile, setSelectedFile] = useState(null);
     const [loading, setLoading] = useState(false);
-    const [message, setMessage] = useState('');
 
     const handleFileChange = (event) => {
         setSelectedFile(event.target.files[0]);
@@ -28,26 +28,27 @@ function UserGnerateReports() {
             return;
         }
         setLoading(true);
-        setMessage('');
 
         const formData = new FormData(e.target);
         const data = {
             name: selectedFile.name,
             file: selectedFile
         }
-        axios.post(`${url}/user/${user.id}/upload`, data, {
+        axios.post(`${url}/user/${user.userInfo.user.id}/upload`, data, {
             headers: {
                 "Content-Type": "multipart/form-data",
                 Authorization: `Bearer ${sessionStorage.getItem("userAccessToken")}`
             }
         }
         ).then((response) => {
+            setLoading(false)
             if (!response.data.error) {
                 setError(true)
                 setErrorType("success")
                 setErrorMessage("Successfully uploaded image..!!");
             }
         }).catch((e) => {
+            setLoading(false)
             if (e.response && e.response.data && e.response.data.message) {
                 setError(true)
                 setErrorType("error")
@@ -60,7 +61,6 @@ function UserGnerateReports() {
             }
         })
         e.target.reset();
-        setLoading(false);
     };
 
     return (
@@ -85,10 +85,15 @@ function UserGnerateReports() {
                         <input name="name" type="file" onChange={handleFileChange} className='bg-secondary rounded-xl px-5 py-4 border-1 border-pink-100' />
                     </div>
                     <button type="submit" className='border-2 border-pink-100 w-full font-bold text-2xl rounded-xl py-3 bg-secondary' disabled={loading}>
-                        {loading ? "Uploading..." : "Generate"}
+                        {
+                            loading ? (
+                                <>
+                                    <CircularProgress color="secondary" />
+                                </>
+                            ) : "Generate"
+                        }
                     </button>
                 </form>
-                {message && <p className='text-center mt-3 font-bold'>{message}</p>}
             </div>
         </div>
     );

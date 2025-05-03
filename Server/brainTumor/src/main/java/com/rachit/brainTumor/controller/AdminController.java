@@ -8,22 +8,17 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
-import java.net.http.HttpResponse;
-import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 @RestController
-@CrossOrigin
 @RequestMapping("/admin")
+@CrossOrigin
 public class AdminController {
 
     @Autowired
@@ -41,18 +36,14 @@ public class AdminController {
     private ImageService imageService;
     @Autowired
     private MRIScansService mriService;
-
-    public static void sortMessagesByDateTime(List<Message> messages) {
-        messages.sort((m1, m2) -> {
-            LocalDateTime dateTime1 = m1.getDateTime();
-            LocalDateTime dateTime2 = m2.getDateTime();
-            return dateTime1.compareTo(dateTime2);
-        });
-    }
+    @Autowired
+    private DoctorService doctorService;
+    @Autowired
+    private PatientService patientService;
 
     // Get Mapping
     @GetMapping({"", "/"})
-    public ResponseEntity<?> getUser(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain){
+    public ResponseEntity<?> getAdmin(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain){
         String  authHeader = request.getHeader("Authorization");
         String token = null;
         String email = null;
@@ -72,114 +63,87 @@ public class AdminController {
 
     @GetMapping("/allPatients")
     public ResponseEntity<?> getAllActivePatients(){
-        List<Status> allPatients = statusService.getAllStatusByStatus("Active");
+        List<Patient> allPatients = patientService.getAllPatients();
         return new ResponseEntity<>(allPatients, HttpStatus.OK);
     }
 
-    @GetMapping("/getUser/{statusId}")
-    public ResponseEntity<?> getUserByStatus(@PathVariable("statusId") int statusId)
-    {
-        Status currentUserStatus = statusService.getStatusById(statusId);
-        if(currentUserStatus.getUserInfo().getUser().getEmail() == "")
-        {
-            return new ResponseEntity<>(new Error("Invalid Request"), HttpStatus.NOT_ACCEPTABLE);
-        }
-        return new ResponseEntity<>(currentUserStatus.getUserInfo(), HttpStatus.OK);
+    @GetMapping("/allDoctors")
+    public ResponseEntity<?> getAllDoctors(){
+        List<Doctor> allDoctors = doctorService.getAllDoctors();
+        return new ResponseEntity<>(allDoctors, HttpStatus.OK);
     }
 
-    @GetMapping("/{userId}/messages")
-    public ResponseEntity<?> getMessages(@PathVariable("userId") int userId)
+    @GetMapping("/{doctorId}/assign/patient/{patientId}")
+    public ResponseEntity<?> assignDoctor(@PathVariable("doctorId") int doctorId, @PathVariable("patientId") int patientId)
     {
-        User user = userService.getUserById(userId);
-        if(user.getEmail() == null)
+        Doctor doctor = doctorService.findById(doctorId);
+        System.out.println("********");
+        System.out.println(1);
+        System.out.println("********");
+        Patient patient = patientService.getPatientById(patientId);
+        System.out.println("********");
+        System.out.println(2);
+        System.out.println("********");
+        if(doctor == null)
         {
-            return new ResponseEntity<>(new Error("Invalid Submit"), HttpStatus.NOT_ACCEPTABLE);
+            return new ResponseEntity<>(new Error("Doctor not found in database"), HttpStatus.NOT_FOUND);
         }
-        List<Message> allMessagesSender = messageService.getAllSenderMessage(user);
-        List<Message> allMessageReciever = messageService.getAllRecieverMessage(user);
-        allMessagesSender.addAll(allMessageReciever);
-        sortMessagesByDateTime(allMessagesSender);
-        return new ResponseEntity<>(allMessagesSender, HttpStatus.OK);
-    }
-
-    @GetMapping("/{userInfoId}/scans")
-    public ResponseEntity<?> getAllScans(@PathVariable("userInfoId") int userInfoId)
-    {
-        UserInfo userInfo = userInfoService.getUserInfoById(userInfoId);
-        if(userInfo.getAge() == 0)
+        System.out.println("********");
+        System.out.println(3);
+        System.out.println("********");
+        if(patient == null)
         {
-            return new ResponseEntity<>(new Error("Invalid Patient"), HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(new Error("Patient not found in database"), HttpStatus.NOT_FOUND);
         }
-        List<MRIScans> allMRIScans = mriService.findAllMRIByUserInfo(userInfo);
-        return new ResponseEntity<>(allMRIScans, HttpStatus.OK);
+        System.out.println("********");
+        System.out.println(4);
+        System.out.println("********");
+        patient.setDoctor(doctor.getUserInfo());
+        System.out.println("********");
+        System.out.println(5);
+        System.out.println("********");
+        if(!doctor.getPatients().contains(patient.getUserInfo()))
+        {
+            doctor.getPatients().add(patient.getUserInfo());
+        }
+        System.out.println("********");
+        System.out.println(6);
+        System.out.println("********");
+        patientService.replacePatient(patient);
+        System.out.println("********");
+        System.out.println(7);
+        System.out.println("********");
+        doctorService.replaceDoctor(doctor);
+        System.out.println("********");
+        System.out.println(8);
+        System.out.println("********");
+        return new ResponseEntity<>("Successfully assigned the doctor", HttpStatus.OK);
     }
 
     // Post Mapping
-    @PostMapping("/addUser")
-    public ResponseEntity<?> addUser(@RequestBody UserInfo userInfo)
+    @PostMapping("/addDoctor")
+    public ResponseEntity<?> addDoctor(@RequestBody UserInfo userInfo)
     {
-        if(userInfo.getUser().getEmail() == "" || userInfo.getUser().getPassword() == "")
+        if(userInfo.getUser().getEmail() == ""  || userInfo.getUser().getPassword() == "")
         {
-            return new ResponseEntity<>(new Error("Please enter email and password.!!"), HttpStatus.NOT_ACCEPTABLE);
+            return new ResponseEntity<>(new Error("Email  and password shouldn't be left blank"),  HttpStatus.NOT_ACCEPTABLE);
         }
-        User alreadyUser = userService.getUserByEmail(userInfo.getUser().getEmail());
-        if(alreadyUser != null)
+        if(userInfo.getName() == "" || String.valueOf(userInfo.getPhone()).length() != 10)
         {
-            return new ResponseEntity<>(new Error("User already registered. !!"), HttpStatus.NOT_ACCEPTABLE);
+            return new ResponseEntity<>(new  Error("Name shouldn't be blank & phone should be of 10 digits"), HttpStatus.NOT_ACCEPTABLE);
         }
-        if(String.valueOf(userInfo.getPhone()).length() != 10)
+        if(userInfo.getAge() <= 0)
         {
-            return new ResponseEntity<>(new Error("Please enter 10 digit phone number.!!"), HttpStatus.NOT_ACCEPTABLE);
+            return new ResponseEntity<>(new Error("Age should be more than 0"), HttpStatus.NOT_ACCEPTABLE);
         }
         userInfo.getUser().setPassword(encoder.encode(userInfo.getUser().getPassword()));
         userService.addUser(userInfo.getUser());
-        User nowRegisteredUser = userService.getUserByEmail(userInfo.getUser().getEmail());
-        userInfo.setUser(nowRegisteredUser);
+        User doctorUser = userService.getUserByEmail(userInfo.getUser().getEmail());
+        userInfo.setUser(doctorUser);
         userInfoService.addUserInfo(userInfo);
-        Status status = new Status();
-        status.setUserInfo(userInfo);
-        statusService.addPatientStatus(status);
-        return new ResponseEntity<>("Successfully registered user.", HttpStatus.OK);
+        UserInfo doctorUserInfo = userInfoService.findByUser(doctorUser);
+        doctorService.addDoctorByUserInfo(doctorUserInfo);
+        return new ResponseEntity<>("Successfully added the doctor", HttpStatus.OK);
     }
-
-    @PostMapping("/{userId}/message")
-    public ResponseEntity<?> SendMessage(@RequestBody Message message, @PathVariable("userId") int userId)
-    {
-        if(message == null || message.getMessage() == "" || message.getDateTime() == null)
-        {
-            return new ResponseEntity<>(new Error("Please enter a message "), HttpStatus.NOT_ACCEPTABLE);
-        }
-        User user = userService.getUserById(userId);
-        if(user == null || user.getEmail() == "")
-        {
-            return new ResponseEntity<>(new Error("Invalid Submit"), HttpStatus.NOT_ACCEPTABLE);
-        }
-        messageService.AddMessage(message);
-       List<Message> allMessagesSender = messageService.getAllSenderMessage(user);
-       List<Message> allMessageReciever = messageService.getAllRecieverMessage(user);
-       allMessagesSender.addAll(allMessageReciever);
-       sortMessagesByDateTime(allMessagesSender);
-       return new ResponseEntity<>(allMessagesSender, HttpStatus.OK);
-    }
-
-    @PostMapping("/{userInfoId}/upload")
-    public ResponseEntity<?> upload(ImageModel imageModel, @PathVariable("userInfoId") int userInfoId) {
-        try {
-            UserInfo userInfo = userInfoService.getUserInfoById(userInfoId);
-            if(userInfo.getAge() == 0)
-            {
-                return new ResponseEntity<>(new Error("Invalid patient."), HttpStatus.NOT_FOUND);
-            }
-            imageService.uploadImage(imageModel, userInfo);
-            return new ResponseEntity<>("ok", HttpStatus.OK);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-
-    // Put Mapping
-
-    // Delete Mapping
 
 }

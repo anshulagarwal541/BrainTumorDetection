@@ -1,63 +1,83 @@
 import React, { useContext, useEffect, useState } from 'react'
 import Box from '@mui/material/Box';
 import { DataGrid } from '@mui/x-data-grid';
+import { AuthContext } from '../../utils/AuthContext';
 import axios from 'axios';
 import { Alert, Snackbar } from '@mui/material';
 import { Link } from 'react-router-dom';
 import RemoveRedEyeIcon from '@mui/icons-material/RemoveRedEye';
-import { AuthContext } from '../../../utils/AuthContext';
-import PreviewIcon from '@mui/icons-material/Preview';
 
-function PatientReports() {
+function View2Doctors() {
     const {
         url,
         error, setError,
         errorType, setErrorType,
-        errorMessage, setErrorMessage,
-        statusId,
-        patient, setPatient,
-        admin, setAdmin
+        errorMessage, setErrorMessage
     } = useContext(AuthContext);
     const [patients, setPatients] = useState([]);
+    const [doctors, setDoctors] = useState(null)
 
     useEffect(() => {
-        if (patient != null) {
-            axios.get(`${url}/doctor/${patient.id}/scans`, {
-                headers: {
-                    Authorization: `Bearer ${sessionStorage.getItem("doctorAccessToken")}`
-                }
-            }).then((response) => {
-                if (!response.data.error) {
-                    InitializeRows(response.data);
-                }
-            }).catch((e) => {
-                if (e.response && e.response.data && e.response.data.message) {
-                    setError(true)
-                    setErrorType("error")
-                    setErrorMessage(e.response.data.message);
-                }
-                else if (e.response && e.response.data) {
-                    setError(true)
-                    setErrorType("error")
-                    setErrorMessage(e.response.data);
-                }
-            })
-        }
-    }, [patient])
+        axios.get(`${url}/admin/allDoctors`, {
+            headers: {
+                Authorization: `Bearer ${sessionStorage.getItem("adminAccessToken")}`
+            }
+        }).then((response) => {
+            if (!response.data.error) {
+                InitializeRows(response.data);
+            }
+        }).catch((e) => {
+            if (e.response && e.response.data && e.response.data.message) {
+                setError(true)
+                setErrorType("error")
+                setErrorMessage(e.response.data.message);
+            }
+            else if (e.response && e.response.data) {
+                setError(true)
+                setErrorType("error")
+                setErrorMessage(e.response.data);
+            }
+        })
+    }, [])
 
-    const InitializeRows = (mriScans) => {
-        const p = mriScans.map(scan => {
+    const InitializeRows = (patients) => {
+        const p = patients.map(patient => {
             return {
-                id: scan.id,
-                email: scan.userInfo.user.email,
-                name: scan.userInfo.name,
-                age: scan.userInfo.age,
-                phone: scan.userInfo.phone,
-                fileName: scan.name,
-                url: scan.url
+                id: patient.id,
+                email: patient.userInfo.user.email,
+                name: patient.userInfo.name,
+                age: patient.userInfo.age,
+                phone: patient.userInfo.phone,
+                patientsNum: patient.patients.length
             }
         })
         setPatients(p);
+    }
+
+    const assignPatientDoctor = (doctorId, patientId) => {
+        axios.get(`${url}/admin/${doctorId}/assign/patient/${patientId}`, {
+            headers: {
+                "Authorization": `Bearer ${sessionStorage.getItem("adminAccessToken")}`
+            }
+        }).then((response) => {
+            if (!response.data.error) {
+                setError(true)
+                setErrorType("success")
+                setErrorMessage(e.response.data.message);
+                window.location.reload();
+            }
+        }).catch((e) => {
+            if (e.response && e.response.data && e.response.data.message) {
+                setError(true)
+                setErrorType("error")
+                setErrorMessage(e.response.data.message);
+            }
+            else if (e.response && e.response.data) {
+                setError(true)
+                setErrorType("error")
+                setErrorMessage(e.response.data);
+            }
+        })
     }
 
     const columns = [
@@ -97,33 +117,18 @@ function PatientReports() {
             align: 'center'
         },
         {
-            field: 'fileName',
-            headerName: 'File Name',
+            field: 'patientsNum',
+            headerName: 'Assigned Patients',
             width: 150,
             headerAlign: 'center',
             align: 'center'
-        },
-        {
-            width: 150,
-            headerName: 'View Scan',
-            headerAlign: 'center',
-            align: 'center',
-            renderCell: (param) => {
-                return (
-                    <Link to={`${param.row.url}`}>
-                        <button className='bg-pink-700 px-5 h-fit rounded-full text-sm'>
-                            <PreviewIcon />
-                        </button>
-                    </Link>
-                )
-            }
         }
     ];
 
     return (
         <div className='min-h-[100vh] bg-secondary text-pink-100 flex flex-col gap-5 justify-center items-center'>
             <div className='text-2xl font-bold text-pink-100 border-2 border-pink-100 px-5 py-2 rounded-xl'>
-                Patient's MRI Scans
+                Doctors
             </div>
             <div className='w-[80%] rounded-2xl'>
                 <Box sx={{ height: 400, width: '100%', color: '#fce7f3', backgroundColor: '#582040', borderRadius: '5px' }}>
@@ -143,13 +148,15 @@ function PatientReports() {
                             backgroundColor: '#582040',
                             '& .MuiDataGrid-columnHeaderTitle': {
                                 fontWeight: 'bold',
-                                color: '#582040',
+                                color: '#582040', // ✅ Keep header text light
                             },
+
+                            // ✅ Centering Table Content
                             '& .MuiDataGrid-cell': {
                                 display: 'flex',
                                 justifyContent: 'center',
                                 alignItems: 'center',
-                                color: '#fce7f3',
+                                color: '#fce7f3', // ✅ Ensure text is visible
                             }
                         }}
                     />
@@ -160,4 +167,4 @@ function PatientReports() {
     )
 }
 
-export default PatientReports
+export default View2Doctors

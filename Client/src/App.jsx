@@ -4,7 +4,6 @@ import Home from "./pages/Home.jsx"
 import AddPatient from "./pages/Admin/AddPatient.jsx";
 import AdminMainLayout from "./pages/Admin/AdminMainLayout.jsx";
 import AdminHome from "./pages/Admin/AdminHome.jsx";
-import GenerateReport from "./pages/Admin/GenerateReport.jsx";
 import ViewPatients from "./pages/Admin/ViewPatients.jsx";
 import UserLogin from "./pages/Auth/UserLogin.jsx";
 import AdminLogin from "./pages/Auth/AdminLogin.jsx";
@@ -23,9 +22,16 @@ import UserReports from "./pages/User/UserReports.jsx";
 import UserGnerateReports from "./pages/User/UserGenerateReport.jsx";
 import UserUpdateDetails from "./pages/User/UserUpdateDetails.jsx";
 import PasswordChange from "./pages/User/PasswordChange.jsx";
+import Admin2MainLayout from "./pages/Admin2 (Updated)/Admin2MainLayout.jsx";
+import Admin2Home from "./pages/Admin2 (Updated)/Admin2Home.jsx";
+import DoctorLogin from "./pages/Auth/DoctorLogin.jsx";
+import Add2Doctor from "./pages/Admin2 (Updated)/Add2Doctor.jsx";
+import View2Patients from "./pages/Admin2 (Updated)/View2Patients.jsx";
+import View2Doctors from "./pages/Admin2 (Updated)/View2Doctors.jsx";
 
 function App() {
-  const url = "https://braintumordetection-backend.onrender.com";
+  // const url = "https://braintumordetection-backend.onrender.com";
+  const url = "http://localhost:8080";
   const [error, setError] = useState(false);
   const [errorType, setErrorType] = useState(null);
   const [errorMessage, setErrorMessage] = useState(null);
@@ -45,12 +51,19 @@ function App() {
           // global home route
           <Route path="/" element={<Home />} />
 
-          // admin pages
-          <Route path="/admin" element={<AdminMainLayout />}>
+          // doctor pages
+          <Route path="/doctor" element={<AdminMainLayout />}>
             <Route path="" element={<AdminHome />} />
             <Route path="addPatient" element={<AddPatient />} />
-            <Route path="generateReport" element={<GenerateReport />} />
             <Route path="viewPatients" element={<ViewPatients />} />
+          </Route>
+
+          // admin pages
+          <Route path="/admin" element={<Admin2MainLayout />}>
+            <Route path="" element={<Admin2Home />} />
+            <Route path="addDoctor" element={<Add2Doctor />} />
+            <Route path="viewPatients" element={<View2Patients />} />
+            <Route path="viewDoctors" element={<View2Doctors />} />
           </Route>
 
           // user pages
@@ -63,8 +76,8 @@ function App() {
             <Route path="changePassword" element={<PasswordChange/>}/>
           </Route>
 
-          // admin-user pages
-          <Route path="/admin/user/:statusId" element={<AdminUserMainLayout />}>
+          // doctor-user pages
+          <Route path="/doctor/user/:statusId" element={<AdminUserMainLayout />}>
             <Route path="" element={<AdminUserHome />} />
             <Route path="generateReport" element={<PatientReportGenerate />} />
             <Route path="reports" element={<PatientReports />} />
@@ -75,6 +88,7 @@ function App() {
           // login routes
           <Route path="/login/admin" element={<AdminLogin />} />
           <Route path="/login/user" element={<UserLogin />} />
+          <Route path="/login/doctor" element={<DoctorLogin />} />
           <Route path="/register/user" element={<UserRegister />} />
 
         </Routes>

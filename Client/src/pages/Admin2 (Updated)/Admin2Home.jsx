@@ -1,12 +1,7 @@
-import React, { useContext } from 'react';
+import React from 'react';
 import { hero_image4 } from '../../../public';
-import { AuthContext } from '../../utils/AuthContext';
 
-function AdminHome() {
-  const {
-    doctor
-  } = useContext(AuthContext);
-
+function Admin2Home() {
   return (
     <div className='min-h-[100vh] bg-secondary'>
       <div
@@ -25,11 +20,9 @@ function AdminHome() {
               Brain Tumor Detection
             </p>
             <p className='text-pink-100 bg-primary px-5 py-3 rounded-full text-center'>
-              Doctor's Page
+              Admin's Page
             </p>
-            <p className='text-pink-100 bg-primary text-sm px-5 py-3 rounded-full text-center'>
-              {doctor && doctor.userInfo.name}
-            </p>
+
             {/* Description */}
             <p className='text-center text-sm w-full sm:w-[80%] md:w-[70%] lg:w-[60%]'>
               Our Brain Tumor Detection platform offers AI-powered tools to analyze brain scans and detect potential tumors early. We provide educational resources, connect you with specialists, and ensure your privacy and security. Early diagnosis can save lives—take control of your health today.
@@ -46,4 +39,4 @@ function AdminHome() {
   );
 }
 
-export default AdminHome;
+export default Admin2Home;

@@ -5,10 +5,7 @@ import com.rachit.brainTumor.jwt.JWTService;
 import com.rachit.brainTumor.models.Status;
 import com.rachit.brainTumor.models.User;
 import com.rachit.brainTumor.models.UserInfo;
-import com.rachit.brainTumor.service.MessageService;
-import com.rachit.brainTumor.service.StatusService;
-import com.rachit.brainTumor.service.UserInfoService;
-import com.rachit.brainTumor.service.UserService;
+import com.rachit.brainTumor.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -33,6 +30,10 @@ public class AuthController {
     private UserInfoService userInfoService;
     @Autowired
     private StatusService statusService;
+    @Autowired
+    private DoctorService doctorService;
+    @Autowired
+    private PatientService patientService;
 
 
     // Get mappings
@@ -84,6 +85,24 @@ public class AuthController {
         return new ResponseEntity<>(new Error("User not found"), HttpStatus.NOT_FOUND);
     }
 
+    @PostMapping("/login/doctor")
+    public ResponseEntity<?> loginDoctor(@RequestBody User user)
+    {
+        if(user.getPassword().isEmpty() || user.getEmail().isEmpty())
+        {
+            return new ResponseEntity<>(new Error("Please enter email or password"), HttpStatus.FORBIDDEN);
+        }
+        User adminUser = userService.getUserByEmail(user.getEmail());
+        if (adminUser == null || !adminUser.getRoles().contains("DOCTOR")) {
+            return new ResponseEntity<>("Doctor not found in database", HttpStatus.NOT_FOUND);
+        }
+        Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(user.getEmail(), user.getPassword()));
+        if (authentication.isAuthenticated()) {
+            return new ResponseEntity<>(jwtService.generateToken(user.getEmail()), HttpStatus.OK);
+        }
+        return new ResponseEntity<>("Failure", HttpStatus.NOT_FOUND);
+    }
+
     @PostMapping("/register/user")
     public ResponseEntity<?> registerUser(@RequestBody UserInfo userInfo)
     {
@@ -114,6 +133,7 @@ public class AuthController {
         Status status = new Status();
         status.setUserInfo(userInfo);
         statusService.addPatientStatus(status);
+        patientService.addPatientByUserInfo(userInfo);
         Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(addedUser.getEmail(), password));
         if(authentication.isAuthenticated())
         {

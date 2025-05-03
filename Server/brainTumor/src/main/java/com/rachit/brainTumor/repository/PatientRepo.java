@@ -1,6 +1,6 @@
 package com.rachit.brainTumor.repository;
 
-import com.rachit.brainTumor.models.Status;
+import com.rachit.brainTumor.models.Patient;
 import com.rachit.brainTumor.models.UserInfo;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -8,9 +8,9 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface StatusRepo extends JpaRepository<Status, Integer> {
+public interface PatientRepo extends JpaRepository<Patient, Integer> {
 
-    List<Status> findAllByStatus(Status.CurrentStatus status);
+    Patient findByUserInfo(UserInfo patientUserInfo);
 
-    Status findByUserInfo(UserInfo userInfo);
+    List<Patient> findAllByDoctor(UserInfo doctorUserInfo);
 }

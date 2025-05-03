@@ -1,8 +1,9 @@
 import axios from 'axios';
-import React, { useContext } from 'react';
+import React, { useContext, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { AuthContext } from '../../utils/AuthContext';
 import { Alert, Snackbar } from '@mui/material';
+import CircularProgress from '@mui/material/CircularProgress';
 
 function UserRegister() {
     const {
@@ -11,9 +12,11 @@ function UserRegister() {
         errorType, setErrorType,
         errorMessage, setErrorMessage
     } = useContext(AuthContext);
+    const [loading, setLoading] = useState(false);
 
     const handleLogin = (e) => {
         e.preventDefault();
+        setLoading(true)
         const formData = new FormData(e.target);
         const data = {
             name: formData.get("name"),
@@ -24,8 +27,8 @@ function UserRegister() {
                 password: formData.get("password")
             }
         };
-        console.log(data);
         axios.post(`${url}/register/user`, data).then((response) => {
+            setLoading(false)
             if (!response.data.error) {
                 sessionStorage.setItem("userAccessToken", response.data);
                 setError(true)
@@ -34,6 +37,7 @@ function UserRegister() {
                 navigate("/user");
             }
         }).catch((e) => {
+            setLoading(false)
             if (e.response && e.response.data && e.response.data.error) {
                 setError(true)
                 setErrorType("error")
@@ -45,7 +49,13 @@ function UserRegister() {
                 setErrorMessage(e.response.data);
             }
         })
-        e.target.reset(); 
+        e.target.reset();
+    };
+
+    const handleClose = () => {
+        setError(false);
+        setErrorMessage(null);
+        setErrorType(null);
     };
 
     return (
@@ -93,7 +103,13 @@ function UserRegister() {
                     ))}
 
                     <button className="px-4 py-2 w-full text-pink-100 bg-secondary border-2 border-pink-100 font-bold rounded-lg hover:bg-primary hover:text-secondary transition-all duration-300">
-                        Sign Up
+                        {
+                            loading ? (
+                                <>
+                                    <CircularProgress color="secondary" />
+                                </>
+                            ) : "Sign Up"
+                        }
                     </button>
 
                     <div className="flex flex-col gap-3">

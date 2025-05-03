@@ -31,4 +31,8 @@ public class MessageService {
         List<Message> allMessages = messageRepo.findAllByReciever(user);
         return allMessages;
     }
+
+    public void clearDatabase() {
+        messageRepo.deleteAll();
+    }
 }

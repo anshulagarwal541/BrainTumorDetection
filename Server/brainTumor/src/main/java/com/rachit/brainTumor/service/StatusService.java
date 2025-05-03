@@ -1,6 +1,7 @@
 package com.rachit.brainTumor.service;
 
 import com.rachit.brainTumor.models.Status;
+import com.rachit.brainTumor.models.UserInfo;
 import com.rachit.brainTumor.repository.StatusRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -27,5 +28,13 @@ public class StatusService {
 
     public Status getStatusById(int statusId) {
         return statusRepo.findById(statusId).orElse(new Status());
+    }
+
+    public void clearDatabse() {
+        statusRepo.deleteAll();
+    }
+
+    public Status getStatusByUserInfo(UserInfo userInfo) {
+        return statusRepo.findByUserInfo(userInfo);
     }
 }

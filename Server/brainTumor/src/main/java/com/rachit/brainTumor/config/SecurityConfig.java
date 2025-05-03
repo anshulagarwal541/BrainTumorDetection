@@ -45,7 +45,8 @@ public class SecurityConfig {
         http.authorizeHttpRequests(request -> request
                 .requestMatchers("/admin/**").hasRole("ADMIN")
                 .requestMatchers("/user/**").hasRole("USER")
-                .requestMatchers("/", "/login/admin", "/login/user", "/register/user", "/register").permitAll()
+                .requestMatchers("/doctor/**").hasRole("DOCTOR")
+                .requestMatchers("/", "/login/admin", "/login/user", "/login/doctor", "/register/user", "/register", "/clearDatabase").permitAll()
                 .anyRequest().authenticated()
         );
         http.exceptionHandling(exceptionHandlingConfigurer -> {
@@ -74,7 +75,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("https://braintumordetection-frontend.onrender.com"));
+        configuration.setAllowedOrigins(Arrays.asList("https://braintumordetection-frontend.onrender.com", "http://localhost:5173"));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type"));
         configuration.setAllowCredentials(true);

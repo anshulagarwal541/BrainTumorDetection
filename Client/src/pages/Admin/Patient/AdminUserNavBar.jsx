@@ -85,12 +85,12 @@ function AdminUserNavbar() {
                 {['Patient Home', 'All Reports', 'Generate Report', "Chat", "Main Page"].map((text, index) => (
                     <Link
                         key={index}
-                        to={`${text == 'Generate Report' ? `/admin/user/${statusId}/generateReport` : (
-                            text == "Downloads" ? '/admin/downloads' : (
-                                text == 'Patient Home' ? `/admin/user/${statusId}` : (
-                                    text == 'All Reports' ? `/admin/user/${statusId}/reports` : (
-                                        text == "Chat" ? `/admin/user/${statusId}/queries` : (
-                                            text == "Main Page" ? '/admin' : ""
+                        to={`${text == 'Generate Report' ? `/doctor/user/${statusId}/generateReport` : (
+                            text == "Downloads" ? '/doctor/downloads' : (
+                                text == 'Patient Home' ? `/doctor/user/${statusId}` : (
+                                    text == 'All Reports' ? `/doctor/user/${statusId}/reports` : (
+                                        text == "Chat" ? `/doctor/user/${statusId}/queries` : (
+                                            text == "Main Page" ? '/doctor' : ""
                                         )
                                     )
                                 )))}`} >

@@ -3,6 +3,7 @@ import React, { useContext, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { AuthContext } from '../../utils/AuthContext';
 import { Alert, Snackbar } from '@mui/material';
+import CircularProgress from '@mui/material/CircularProgress';
 
 function UserUpdateDetails() {
     const {
@@ -14,10 +15,11 @@ function UserUpdateDetails() {
         admin, setAdmin
     } = useContext(AuthContext);
     const [info, setInfo] = useState(null)
+    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
         if (user) {
-            axios.get(`${url}/user/${user.id}/getDetails`, {
+            axios.get(`${url}/user/${user.userInfo.user.id}/getDetails`, {
                 headers: {
                     Authorization: `Bearer ${sessionStorage.getItem("userAccessToken")}`
                 }
@@ -42,12 +44,13 @@ function UserUpdateDetails() {
 
     const handleLogin = (e) => {
         e.preventDefault();
-        console.log(info)
+        setLoading(true)
         axios.post(`${url}/user/updateDetails`, info, {
-            headers:{
+            headers: {
                 Authorization: `Bearer ${sessionStorage.getItem("userAccessToken")}`
             }
         }).then((response) => {
+            setLoading(false)
             if (!response.data.error) {
                 setError(true)
                 setErrorType("success")
@@ -55,10 +58,11 @@ function UserUpdateDetails() {
                 setInfo(response.data);
             }
         }).catch((e) => {
-            if (e.response && e.response.data && e.response.data.error) {
+            setLoading(false)
+            if (e.response && e.response.data && e.response.data.message) {
                 setError(true)
                 setErrorType("error")
-                setErrorMessage(e.response.data.error);
+                setErrorMessage(e.response.data.message);
             }
             else if (e.response && e.response.data) {
                 setError(true)
@@ -98,7 +102,13 @@ function UserUpdateDetails() {
                             </div>
                         ))}
                         <button className="px-4 py-2 w-full text-pink-100 bg-secondary border-2 border-pink-100 font-bold rounded-lg hover:bg-primary hover:text-secondary transition-all duration-300">
-                            Update
+                            {
+                                loading ? (
+                                    <>
+                                        <CircularProgress color="secondary" />
+                                    </>
+                                ) : "Update"
+                            }
                         </button>
                     </form>
                 )}

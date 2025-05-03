@@ -12,42 +12,47 @@ function ViewPatients() {
         url,
         error, setError,
         errorType, setErrorType,
-        errorMessage, setErrorMessage
+        errorMessage, setErrorMessage,
+        doctor
     } = useContext(AuthContext);
     const [patients, setPatients] = useState([]);
 
     useEffect(() => {
-        axios.get(`${url}/admin/allPatients`, {
-            headers: {
-                Authorization: `Bearer ${sessionStorage.getItem("adminAccessToken")}`
-            }
-        }).then((response) => {
-            if (!response.data.error) {
-                InitializeRows(response.data);
-            }
-        }).catch((e) => {
-            if (e.response && e.response.data && e.response.data.message) {
-                setError(true)
-                setErrorType("error")
-                setErrorMessage(e.response.data.message);
-            }
-            else if (e.response && e.response.data) {
-                setError(true)
-                setErrorType("error")
-                setErrorMessage(e.response.data);
-            }
-        })
-    }, [])
+        if (doctor) {
+            axios.get(`${url}/doctor/${doctor.userInfo.id}/allPatients`, {
+                headers: {
+                    Authorization: `Bearer ${sessionStorage.getItem("doctorAccessToken")}`
+                }
+            }).then((response) => {
+                if (!response.data.error) {
+                    console.log(response.data)
+                    InitializeRows(response.data);
+                }
+            }).catch((e) => {
+                if (e.response && e.response.data && e.response.data.message) {
+                    setError(true)
+                    setErrorType("error")
+                    setErrorMessage(e.response.data.message);
+                }
+                else if (e.response && e.response.data) {
+                    setError(true)
+                    setErrorType("error")
+                    setErrorMessage(e.response.data);
+                }
+            })
+        }
+    }, [doctor])
 
     const InitializeRows = (patients) => {
         const p = patients.map(patient => {
             return {
-                id: patient.userInfo.user.id,
+                id: patient.id,
                 email: patient.userInfo.user.email,
                 name: patient.userInfo.name,
                 age: patient.userInfo.age,
                 phone: patient.userInfo.phone,
-                statusId: patient.id
+                statusId: patient.id,
+                status: patient.status
             }
         })
         setPatients(p);
@@ -90,10 +95,17 @@ function ViewPatients() {
             align: 'center'
         },
         {
+            field: 'status',
+            headerName: 'status',
+            width: 150,
+            headerAlign: 'center',
+            align: 'center'
+        },
+        {
             width: 150,
             renderCell: (param) => {
                 return (
-                    <Link key={param.row.id} to={`/admin/user/${param.row.statusId}`}>
+                    <Link key={param.row.id} to={`/doctor/user/${param.row.statusId}`}>
                         <button className='bg-pink-700 px-5 h-fit rounded-full text-sm'>
                             <RemoveRedEyeIcon />
                         </button>

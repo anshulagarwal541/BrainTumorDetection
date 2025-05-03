@@ -9,7 +9,8 @@ function AddPatient() {
     url,
     error, setError,
     errorType, setErrorType,
-    errorMessage, setErrorMessage
+    errorMessage, setErrorMessage,
+    doctor
   } = useContext(AuthContext);
 
   const handleSubmit = (e) => {
@@ -24,9 +25,9 @@ function AddPatient() {
         password: "1234"
       }
     }
-    axios.post(`${url}/admin/addUser`, data, {
+    axios.post(`${url}/doctor/${doctor.id}/addUser`, data, {
       headers: {
-        Authorization: `Bearer ${sessionStorage.getItem("adminAccessToken")}`
+        Authorization: `Bearer ${sessionStorage.getItem("doctorAccessToken")}`
       }
     }).then((response) => {
       if (!response.data.error) {
@@ -35,10 +36,10 @@ function AddPatient() {
         setErrorMessage(response.data)
       }
     }).catch((e) => {
-      if (e.response && e.response.data && e.response.data.error) {
+      if (e.response && e.response.data && e.response.data.message) {
         setError(true)
         setErrorType("error")
-        setErrorMessage(e.response.data.error);
+        setErrorMessage(e.response.data.message);
       }
       else if (e.response && e.response.data) {
         setError(true)

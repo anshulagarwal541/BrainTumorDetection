@@ -3,6 +3,7 @@ import React, { useContext, useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../../utils/AuthContext';
 import { Alert, Snackbar } from '@mui/material';
+import CircularProgress from '@mui/material/CircularProgress';
 
 function PasswordChange() {
     const {
@@ -15,20 +16,22 @@ function PasswordChange() {
     } = useContext(AuthContext);
     const [password, setPassword] = useState(null)
     const navigate = useNavigate();
+    const [loading, setLoading] = useState(false);
 
     const handleLogin = (e) => {
         e.preventDefault();
-
         if (password != null) {
             if (password.password != null && password["re-enter-password"] != null) {
                 if (password.password == password["re-enter-password"]) {
+                    setLoading(true)
                     const data = user;
-                    data.password = password.password
+                    data.userInfo.user.password = password.password
                     axios.post(`${url}/user/changePassword`, data, {
                         headers: {
                             Authorization: `Bearer ${sessionStorage.getItem("userAccessToken")}`
                         }
                     }).then((response) => {
+                        setLoading(false)
                         if (!response.data.error) {
                             setError(true)
                             setErrorType("success")
@@ -38,6 +41,7 @@ function PasswordChange() {
                             navigate("/login/user")
                         }
                     }).catch((e) => {
+                        setLoading(false)
                         if (e.response && e.response.data && e.response.data.error) {
                             setError(true)
                             setErrorType("error")
@@ -99,7 +103,13 @@ function PasswordChange() {
                         </div>
                     ))}
                     <button className="px-4 py-2 w-full text-pink-100 bg-secondary border-2 border-pink-100 font-bold rounded-lg hover:bg-primary hover:text-secondary transition-all duration-300">
-                        Update Password
+                        {
+                            loading ? (
+                                <>
+                                    <CircularProgress color="secondary" />
+                                </>
+                            ) : "Update Password"
+                        }
                     </button>
                 </form>
             </div>

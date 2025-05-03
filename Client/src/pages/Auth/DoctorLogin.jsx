@@ -9,8 +9,7 @@ import { useNavigate } from 'react-router-dom'
 import CircularProgress from '@mui/material/CircularProgress';
 
 
-
-function AdminLogin() {
+function DoctorLogin() {
     const {
         url,
         error, setError,
@@ -28,16 +27,16 @@ function AdminLogin() {
         const data = {
             email: formData.get("email"),
             password: formData.get("password"),
-            roles: ["ADMIN"]
+            roles: ["DOCTOR"]
         }
-        axios.post(`${url}/login/admin`, data).then((response) => {
+        axios.post(`${url}/login/doctor`, data).then((response) => {
             setLoading(false)
             if (!response.data.error) {
-                sessionStorage.setItem("adminAccessToken", response.data);
+                sessionStorage.setItem("doctorAccessToken", response.data);
                 setError(true)
                 setErrorType("success")
-                setErrorMessage("Successfully logged in as ADMIN..!!");
-                navigate("/admin");
+                setErrorMessage("Successfully logged in as DOCTOR..!!");
+                navigate("/doctor");
             }
         }).catch((e) => {
             setLoading(false)
@@ -97,7 +96,7 @@ function AdminLogin() {
                         className="bg-primary text-pink-100 w-full p-5 sm:p-8 rounded-2xl border-2 border-pink-100 gap-5 flex flex-col"
                     >
                         <div className='bg-secondary text-pink-100 text-2xl font-bold border-2 border-pink-100 rounded-2xl text-center px-5 py-2'>
-                            Admin Login
+                            Doctor Login
                         </div>
                         <div className="flex flex-col gap-2">
                             <label htmlFor="email" className="font-bold text-sm sm:text-base">
@@ -133,22 +132,18 @@ function AdminLogin() {
                             }
                         </button>
                         <div className="flex flex-col gap-2">
-                            <p className='font-bold flex gap-5 items-center justify-between'>
-                                <p>Login as User ?</p>
+                            <p className='font-bold flex gap-5 items-center justify-between'>Login as User ?
                                 <Link to="/login/user">
                                     <button className="px-4 py-2 w-fit text-pink-100 bg-secondary border-2 border-pink-100 font-bold hover:bg-primary hover:text-secondary transition-all duration-300">
                                         Login
                                     </button>
-                                </Link>
-                            </p>
-                            <p className='font-bold flex gap-5 items-center justify-between'>
-                                <p>Login as Doctor ?</p>
-                                <Link to="/login/doctor">
+                                </Link></p>
+                            <p className='font-bold flex gap-5 items-center justify-between'>Login as Admin ?
+                                <Link to="/login/admin">
                                     <button className="px-4 py-2 w-fit text-pink-100 bg-secondary border-2 border-pink-100 font-bold hover:bg-primary hover:text-secondary transition-all duration-300">
                                         Login
                                     </button>
-                                </Link>
-                            </p>
+                                </Link></p>
                         </div>
                     </form>
                 </div>
@@ -157,4 +152,4 @@ function AdminLogin() {
     )
 }
 
-export default AdminLogin
+export default DoctorLogin

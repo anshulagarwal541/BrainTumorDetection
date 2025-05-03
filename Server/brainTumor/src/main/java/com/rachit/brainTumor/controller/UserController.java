@@ -36,6 +36,10 @@ public class UserController {
     private ImageService imageService;
     @Autowired
     private MRIScansService mriService;
+    @Autowired
+    private DoctorService doctorService;
+    @Autowired
+    private PatientService patientService;
 
     public static void sortMessagesByDateTime(List<Message> messages) {
         messages.sort((m1, m2) -> {
@@ -59,7 +63,15 @@ public class UserController {
         if (email != null) {
             User user = userService.getUserByEmail(email);
             if (user != null) {
-                return new ResponseEntity<>(user, HttpStatus.OK);
+                UserInfo userInfo = userInfoService.findByUser(user);
+                if(userInfo != null)
+                {
+                    Patient patient = patientService.getPatientByUserInfo(userInfo);
+                    if(patient != null)
+                    {
+                        return new ResponseEntity<>(patient, HttpStatus.OK);
+                    }
+                }
             }
         }
         return new ResponseEntity<>(new Error("No user with given email found."), HttpStatus.NOT_FOUND);
@@ -80,15 +92,31 @@ public class UserController {
         return new ResponseEntity<>(allMessagesSender, HttpStatus.OK);
     }
 
-    @GetMapping("/getAdmin")
-    public ResponseEntity<?> getAdmin()
-    {
-        User admin = userService.getUserByRole("ADMIN");
-        if(admin.getEmail() == "")
+    @GetMapping("/getDoctor")
+    public ResponseEntity<?> getAdmin(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain){
+        String  authHeader = request.getHeader("Authorization");
+        String token = null;
+        String email = null;
+        if(authHeader!=null && authHeader.startsWith("Bearer "))
         {
-            return new ResponseEntity<>(new Error("Admin not found"), HttpStatus.NOT_FOUND);
+            token=authHeader.substring(7);
+            email=jwtService.extractUsername(token);
         }
-        return new ResponseEntity<>(admin, HttpStatus.OK);
+        if (email != null) {
+            User user = userService.getUserByEmail(email);
+            if (user != null) {
+                UserInfo userInfo = userInfoService.findByUser(user);
+                if(userInfo != null)
+                {
+                    Patient patient = patientService.getPatientByUserInfo(userInfo);
+                    if(patient != null)
+                    {
+                        return new ResponseEntity<>(patient.getDoctor(), HttpStatus.OK);
+                    }
+                }
+            }
+        }
+        return new ResponseEntity<>(new Error("No user with given email found."), HttpStatus.NOT_FOUND);
     }
 
     @GetMapping("/{userId}/scans")
@@ -162,31 +190,34 @@ public class UserController {
             imageService.uploadImage(imageModel, userInfo);
             return new ResponseEntity<>("ok", HttpStatus.OK);
         } catch (Exception e) {
-            e.printStackTrace();
-            return null;
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
 
     @PostMapping("/updateDetails")
     public ResponseEntity<?> updateDetails(@RequestBody UserInfo userInfo)
     {
-        UserInfo currentUserInfo = userInfoService.getUserInfoById(userInfo.getId());
-        if(currentUserInfo.getAge() == 0)
+        if(userInfo.getAge() <= 0)
         {
-            return new ResponseEntity<>(new Error("Some error occured..!!!"), HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(new Error("Age must be greater than 0"), HttpStatus.NOT_ACCEPTABLE);
         }
-
-        userService.updateUser(userInfo.getUser());
-        User updatedUser = userService.getUserByEmail(userInfo.getUser().getEmail());
-        userInfo.setUser(updatedUser);
-        userInfoService.updateUserInfo(userInfo);
+        if(userInfo.getName() == "")
+        {
+            return new ResponseEntity<>(new Error("Name must not be blanked"), HttpStatus.NOT_ACCEPTABLE);
+        }
+        if(String.valueOf(userInfo.getPhone()).length() != 10)
+        {
+            return new ResponseEntity<>(new Error("Phone number should be 10"), HttpStatus.NOT_ACCEPTABLE);
+        }
+        userInfoService.addUserInfo(userInfo);
         UserInfo updatedUserInfo = userInfoService.getUserInfoById(userInfo.getId());
         return new ResponseEntity<>(updatedUserInfo, HttpStatus.OK);
     }
 
     @PostMapping("/changePassword")
-    public ResponseEntity<?> changePassword(@RequestBody User user)
+    public ResponseEntity<?> changePassword(@RequestBody Patient patient)
     {
+        User  user = patient.getUserInfo().getUser();
         user.setPassword(encoder.encode(user.getPassword()));
         userService.updateUserByPassword(user);
         return new ResponseEntity<>("ok", HttpStatus.OK);

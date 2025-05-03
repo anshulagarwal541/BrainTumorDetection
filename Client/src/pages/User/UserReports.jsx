@@ -21,7 +21,7 @@ function UserReports() {
 
     useEffect(() => {
         if (user != null) {
-            axios.get(`${url}/user/${user.id}/scans`, {
+            axios.get(`${url}/user/${user.userInfo.user.id}/scans`, {
                 headers: {
                     Authorization: `Bearer ${sessionStorage.getItem("userAccessToken")}`
                 }
@@ -47,7 +47,7 @@ function UserReports() {
     const InitializeRows = (mriScans) => {
         const p = mriScans.map(scan => {
             return {
-                id: scan.userInfo.user.id,
+                id: scan.id,
                 email: scan.userInfo.user.email,
                 name: scan.userInfo.name,
                 age: scan.userInfo.age,

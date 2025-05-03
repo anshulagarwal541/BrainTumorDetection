@@ -18,4 +18,7 @@ public class MRIScansService {
         return mriRepo.findAllByUserInfo(userInfo);
     }
 
+    public void clearDatabse() {
+        mriRepo.deleteAll();
+    }
 }

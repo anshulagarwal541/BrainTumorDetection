@@ -1,40 +1,15 @@
-import React, { useContext, useEffect, useState } from 'react'
-import NavBar from '../../components/NavBar'
+import React, { useContext } from 'react'
+import NavBar from '../../components/NavBar';
 import { AuthContext } from '../../utils/AuthContext';
 import { Alert, Snackbar } from '@mui/material';
-import axios from 'axios';
 
-function AdminDashboard({ children }) {
+function Admin2Dashboard({ children }) {
   const {
     url,
     error, setError,
     errorType, setErrorType,
     errorMessage, setErrorMessage
   } = useContext(AuthContext);
-  const [doctor, setDoctor] = useState(null)
-
-  useEffect(()=>{
-    axios.get(`${url}/doctor`, {
-      headers:{
-        "Authorization" : `Bearer ${sessionStorage.getItem("doctorAccessToken")}`
-      }
-    }).then((response) => {
-      if (!response.data.error) {
-          setDoctor(response.data)
-      }
-  }).catch((e) => {
-      if (e.response && e.response.data && e.response.data.message) {
-          setError(true)
-          setErrorType("error")
-          setErrorMessage(e.response.data.message);
-      }
-      else if (e.response && e.response.data) {
-          setError(true)
-          setErrorType("error")
-          setErrorMessage(e.response.data);
-      }
-  })
-  }, [])
 
   const handleClose = () => {
     setError(false);
@@ -48,8 +23,7 @@ function AdminDashboard({ children }) {
         url,
         error, setError,
         errorType, setErrorType,
-        errorMessage, setErrorMessage,
-        doctor
+        errorMessage, setErrorMessage
       }}
     >
       <div>
@@ -80,4 +54,4 @@ function AdminDashboard({ children }) {
   )
 }
 
-export default AdminDashboard
+export default Admin2Dashboard

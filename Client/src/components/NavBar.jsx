@@ -21,21 +21,27 @@ function NavBar() {
   const { url } = useContext(AuthContext);
   const [state, setState] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
-  const [isUser, setIsUser] = useState(false)
+  const [isUser, setIsUser] = useState(false);
+  const [isDoctor, setIsDoctor] = useState(false);
 
   useEffect(() => {
     const adminToken = sessionStorage.getItem('adminAccessToken');
     const userToken = sessionStorage.getItem('userAccessToken')
-    if (adminToken == null && userToken == null) {
+    const doctorToken = sessionStorage.getItem('doctorAccessToken')
+    if (adminToken == null && userToken == null && doctorToken == null) {
       setIsAdmin(false)
       setIsUser(false)
+      setIsDoctor(false);
     }
     else {
       if (adminToken != null) {
         setIsAdmin(true)
       }
-      else {
+      else if (userToken != null) {
         setIsUser(true)
+      }
+      else if (doctorToken != null) {
+        setIsDoctor(true)
       }
     }
     if (sessionStorage.getItem("adminAccessToken") != null) {
@@ -43,6 +49,9 @@ function NavBar() {
     }
     if (sessionStorage.getItem("userAccessToken") != null) {
       setIsUser(true);
+    }
+    if (sessionStorage.getItem("doctorAccessToken") != null) {
+      setIsDoctor(true);
     }
   }, [])
 
@@ -75,17 +84,16 @@ function NavBar() {
     >
       <List
       >
-        {isAdmin && (
+        {isDoctor && (
           <>
-            {['Home', 'Add Patient', 'View Patients', 'Generate Report'].map((text, index) => (
+            {['Home', 'Add Patient', 'View Patients'].map((text, index) => (
               <Link
                 key={index}
-                to={`${text == 'Add Patient' ? '/admin/addPatient' : (
-                  text == 'Generate Report' ? '/admin/generateReport' : (
-                    text == "Downloads" ? '/admin/downloads' : (
-                      text == 'Home' ? '/admin' : (
-                        text == 'View Patients' ? '/admin/viewPatients' : ''
-                      ))))}`} >
+                to={`${text == 'Add Patient' ? '/doctor/addPatient' : (
+                    text == "Downloads" ? '/doctor/downloads' : (
+                      text == 'Home' ? '/doctor' : (
+                        text == 'View Patients' ? '/doctor/viewPatients' : ''
+                      )))}`} >
                 <ListItem disablePadding>
                   <ListItemButton>
                     <ListItemIcon>
@@ -125,10 +133,33 @@ function NavBar() {
             ))}
           </>
         )}
+        {isAdmin && (
+          <>
+            {['Home', 'Add Doctor', 'View Patients', 'View Doctors'].map((text, index) => (
+              <Link
+                key={index}
+                to={`${text == 'Add Doctor' ? '/admin/addDoctor' : (
+                    text == "Downloads" ? '/admin/downloads' : (
+                      text == 'Home' ? '/admin' : (
+                        text == 'View Patients' ? '/admin/viewPatients' : (
+                          text == 'View Doctors' ? '/admin/viewDoctors' : ""
+                        ))))}`} >
+                <ListItem disablePadding>
+                  <ListItemButton>
+                    <ListItemIcon>
+                      {index % 2 === 0 ? <InboxIcon sx={{ color: 'white' }} /> : <MailIcon sx={{ color: 'white' }} />}
+                    </ListItemIcon>
+                    <ListItemText primary={text} />
+                  </ListItemButton>
+                </ListItem>
+              </Link>
+            ))}
+          </>
+        )}
       </List>
       <Divider sx={{ backgroundColor: 'white' }} />
       <div className='font-bold py-2 min-w-full'>
-        {(isAdmin || isUser) ? (
+        {(isAdmin || isUser || isDoctor) ? (
           <button onClick={handleLogOut} className='border-2 border-pink-100 px-5 py-2 w-full bg-secondary text-pink-100'>
             logout
           </button>

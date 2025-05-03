@@ -36,7 +36,7 @@ function UserDashboard({ children }) {
       }
     })
 
-    axios.get(`${url}/user/getAdmin`, {
+    axios.get(`${url}/user/getDoctor`, {
       headers:{
         Authorization: `Bearer ${sessionStorage.getItem("userAccessToken")}`
       }

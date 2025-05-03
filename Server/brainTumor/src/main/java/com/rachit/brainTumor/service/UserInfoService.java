@@ -29,4 +29,8 @@ public class UserInfoService {
     public void updateUserInfo(UserInfo userInfo) {
         userInfoRepo.save(userInfo);
     }
+
+    public void clearDatabase() {
+        userInfoRepo.deleteAll();
+    }
 }
