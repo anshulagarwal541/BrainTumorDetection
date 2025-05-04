@@ -30,8 +30,8 @@ import View2Patients from "./pages/Admin2 (Updated)/View2Patients.jsx";
 import View2Doctors from "./pages/Admin2 (Updated)/View2Doctors.jsx";
 
 function App() {
-  // const url = "https://braintumordetection-backend.onrender.com";
-  const url = "http://localhost:8080";
+  const url = "https://braintumordetection-backend.onrender.com";
+  // const url = "http://localhost:8080";
   const [error, setError] = useState(false);
   const [errorType, setErrorType] = useState(null);
   const [errorMessage, setErrorMessage] = useState(null);
