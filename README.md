@@ -4,4 +4,4 @@ Admin :-
 
 Doctor :- 
    email - doctor1@gmail.com
-   password - doctor1
+   password - doctor
