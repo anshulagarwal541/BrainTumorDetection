@@ -33,12 +33,12 @@ public class ResetDatabaseController {
     public ResponseEntity<?>  ClearDatabase()
     {
         try{
-            userInfoService.clearDatabase();
             mriScansService.clearDatabse();
             statusService.clearDatabse();
             doctorService.clearDatabase();
             patientService.clearDatabase();
             messageService.clearDatabase();
+            userInfoService.clearDatabase();
             userService.clearDatabase();
         } catch(Exception e) {
             System.out.println("*****");
